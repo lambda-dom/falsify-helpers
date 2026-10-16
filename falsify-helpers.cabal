@@ -26,6 +26,7 @@ common common-fields
     default-language: GHC2021
     default-extensions:
         DerivingStrategies
+        PatternSynonyms
     ghc-options:
         -Wall
         -Wcompat
@@ -41,8 +42,9 @@ common common-fields
         -- Prepare for dependent types.
         -Wterm-variable-capture
     build-depends:
-        base >=4.20 && <4.21,
-        text >=2.1  && <2.2,
+        base        >=4.20  && <4.21,
+        text        >=2.1   && <2.2,
+        optics-core >=0.4.2 && <0.4.3,
 
 library
     import:
@@ -51,3 +53,4 @@ library
         src
     exposed-modules:
         Data.Either
+        Data.Function.Annotated
