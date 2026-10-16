@@ -16,14 +16,14 @@ module Data.Function.Annotated (
     -- * The @Operator@ type.
     Operator,
 
-    -- ** Smart constructors.
-    makeOperator,
+    -- ** Prisms.
+    operator,
 
     -- * The @Identifier@ type.
     Identifier,
 
-    -- ** Smart constructors.
-    makeIdentifier,
+    -- ** Prisms.
+    identifier,
 
     -- * The @Function@ type.
     Function (..),
@@ -61,17 +61,17 @@ import GHC.Generics (Generic)
 import qualified Control.Category as Category (Category (..))
 import Data.Bifunctor (bimap)
 import Data.Char (isLetter, isAlphaNum)
+import Data.Function ((&))
 import Data.Tuple (swap)
+import Data.Void (Void, absurd)
 
 -- Libraries.
 import Data.Text (Text, pattern (:<), pattern Empty, unpack, pack)
 import qualified Data.Text as Text (all)
-import Optics.Core ((^.), (.~))
+import Optics.Core (Prism', (^.), (.~), prism')
 
 -- Package.
 import Data.Either ((:+:), coswap, coassociator)
-import Data.Void (Void, absurd)
-import Data.Function ((&))
 
 
 {- | Surround a 'Text' with parens. -}
@@ -90,24 +90,36 @@ isOperator Empty = False
 isOperator xs    = Text.all (`elem` "<>|$%/=?+*.:~^") xs
 
 
-{- | The @Identifier@ type. -}
-newtype Identifier = Identifier Text
-    deriving stock Eq
-    deriving newtype Show
-
-{- | Smart constructor for the @t'Identifier'@ type. -}
-makeIdentifier :: Text -> Maybe Identifier
-makeIdentifier xs = if isIdentifier xs then Just . Identifier $ xs else Nothing
-
-
 {- | The @Operator@ type. -}
 newtype Operator = Operator Text
     deriving stock Eq
     deriving newtype Show
 
-{- | Smart constructor for the @t'Operator'@ type. -}
-makeOperator :: Text -> Maybe Operator
-makeOperator xs = if isOperator xs then Just . Operator $ xs else Nothing
+{- | Prism for t'Identifier'. -}
+operator :: Prism' Text Operator
+operator = prism' make match
+    where
+        make :: Operator -> Text
+        make (Operator xs) = xs
+
+        match :: Text -> Maybe Operator
+        match xs = if isOperator xs then Just . Operator $ xs else Nothing
+
+
+{- | The @Identifier@ type. -}
+newtype Identifier = Identifier Text
+    deriving stock Eq
+    deriving newtype Show
+
+{- | Prism for t'Identifier'. -}
+identifier :: Prism' Text Identifier
+identifier = prism' make match
+    where
+        make :: Identifier -> Text
+        make (Identifier xs) = xs
+
+        match :: Text -> Maybe Identifier
+        match xs = if isIdentifier xs then Just . Identifier $ xs else Nothing
 
 
 {- | A show-able function. -}

@@ -43,8 +43,10 @@ common common-fields
         -Wterm-variable-capture
     build-depends:
         base        >=4.20  && <4.21,
+        bytestring  >=0.12  && <0.13,
         text        >=2.1   && <2.2,
         optics-core >=0.4.2 && <0.4.3,
+        falsify     >=0.4   && <0.5
 
 library
     import:
@@ -54,3 +56,4 @@ library
     exposed-modules:
         Data.Either
         Data.Function.Annotated
+        Data.Gen
