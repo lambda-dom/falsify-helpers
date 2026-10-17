@@ -26,6 +26,7 @@ common common-fields
     default-language: GHC2021
     default-extensions:
         DerivingStrategies
+        OverloadedLabels
         PatternSynonyms
     ghc-options:
         -Wall
@@ -56,4 +57,6 @@ library
     exposed-modules:
         Data.Either
         Data.Function.Annotated
-        Data.Gen
+        Test.Gen
+        Test.Predicate
+        Test.Property

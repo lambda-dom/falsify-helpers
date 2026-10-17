@@ -1,5 +1,4 @@
 {-# LANGUAGE NoFieldSelectors #-}
-{-# LANGUAGE OverloadedLabels #-}
 
 {- |
 

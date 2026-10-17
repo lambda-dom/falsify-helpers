@@ -1,6 +1,6 @@
 {- | Some generators used in testing. -}
 
-module Data.Gen (
+module Test.Gen (
     -- * Generators for primitive types.
     integral,
     enumFull,
