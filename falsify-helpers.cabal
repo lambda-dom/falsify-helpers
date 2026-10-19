@@ -60,3 +60,4 @@ library
         Test.Gen
         Test.Predicate
         Test.Property
+        Test.Optics
