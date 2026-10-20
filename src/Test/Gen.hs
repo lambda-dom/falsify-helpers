@@ -49,8 +49,7 @@ import qualified Data.Text.Internal as Internal (safe)
 -- Testing.
 import Data.Function.Annotated (NamedFn, annotateE)
 import Test.Falsify (Gen, Fun, pattern Fn)
-import Test.Falsify.Generator (inRange, list, int, fun)
-import qualified Test.Falsify.Generator as Falsify (Function)
+import Test.Falsify.Generator (Function, inRange, list, int, fun)
 import Test.Falsify.Range (uniform, inclusive, enum)
 import Data.Text (pack)
 
@@ -135,8 +134,8 @@ quadruple f g h i = (,,,) <$> f <*> g <*> h <*> i
 
 
 {- | Generator for named functions. -}
-functions :: forall a b . (Falsify.Function a, Show a, Show b) => Gen b -> Gen (NamedFn a b)
-functions genB = fmap transform $ fun genB
+functions :: forall a b . (Function a, Show a, Show b) => Gen b -> Gen (NamedFn a b)
+functions genB = transform <$> fun genB
     where
         transform :: Fun a b -> NamedFn a b
         transform fn = let Fn f = fn in annotateE (pack $ show fn) f
