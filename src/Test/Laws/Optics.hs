@@ -1,12 +1,12 @@
 {- | Optics laws as properties. -}
 
-module Test.Optics (
+module Test.Laws.Optics (
     -- * From optics to named functions.
     fromLens,
 
     -- * Optics laws.
-    test_isomorphism_laws,
-    test_prism_laws,
+    prop_isomorphism_laws,
+    prop_prism_laws,
 ) where
 
 -- Imports.
@@ -45,26 +45,26 @@ fromPrism xs p = (f, g)
 
 
 {- | Test the Isomorphism laws. -}
-test_isomorphism_laws
+prop_isomorphism_laws
     :: (Eq a, Eq b, Show a, Show b)
     => Text
     -> Iso' a b
     -> Gen a
     -> Gen b
     -> Property ()
-test_isomorphism_laws xs i genA genB = let (f, g) = fromIso xs i in
+prop_isomorphism_laws xs i genA genB = let (f, g) = fromIso xs i in
         prop_extensional_equality (composeE g f) idE genA *>
         prop_extensional_equality (composeE f g) idE genB
 
 {- | Test the Prism laws. -}
-test_prism_laws
+prop_prism_laws
     :: forall a s . (Eq a, Eq s, Show a, Show s)
     => Text
     -> Prism' s a
     -> Gen s
     -> Gen a
     -> Property ()
-test_prism_laws xs p genS genA = let (q, r) = fromPrism xs p in
+prop_prism_laws xs p genS genA = let (q, r) = fromPrism xs p in
         prop_extensional_equality (composeE q r) just genA *>
         prop_extensional_equality (composeE (mapE r) q) matches genS
     where
