@@ -24,10 +24,10 @@ module Data.Function.Annotated (
     -- ** Prisms.
     identifier,
 
-    -- * The @Function@ type.
-    Function (..),
+    -- * The @NamedFn@ type.
+    NamedFn (..),
 
-    -- ** @t'Function'@ combinators.
+    -- ** @t'NamedFn'@ combinators.
     annotateE,
     letE,
     idE,
@@ -122,135 +122,135 @@ identifier = prism' make match
 
 
 {- | A show-able function. -}
-data Function a b = Function {
+data NamedFn a b = NamedFn {
     name     :: !Text,
     function :: (a -> b)
 } deriving stock (Generic)
 
 
 -- Instances.
-instance Show (Function a b) where
-    show :: Function a b -> String
+instance Show (NamedFn a b) where
+    show :: NamedFn a b -> String
     show = unpack . (^. #name)
 
-instance Category.Category Function where
-    id :: Function a a
+instance Category.Category NamedFn where
+    id :: NamedFn a a
     id = idE
 
-    (.) :: Function b c -> Function a b -> Function a c
+    (.) :: NamedFn b c -> NamedFn a b -> NamedFn a c
     (.) = composeE
 
 
 {- | Annotate a function with a name. -}
-annotateE :: Text -> (a -> b) -> Function a b
-annotateE = Function
+annotateE :: Text -> (a -> b) -> NamedFn a b
+annotateE = NamedFn
 
 {- | Assign an identifier to a named function. -}
-letE :: Identifier -> Function a b -> Function a b
+letE :: Identifier -> NamedFn a b -> NamedFn a b
 letE (Identifier xs) f = f & #name .~ xs
 
 {- | The identity. -}
-idE :: Function a a
+idE :: NamedFn a a
 idE = annotateE (pack "id") id
 
 {- | Composition of two named functions. -}
-composeE :: Function b c -> Function a b -> Function a c
+composeE :: NamedFn b c -> NamedFn a b -> NamedFn a c
 composeE g f =
     annotateE
         (g ^. #name <> pack " . " <> f ^. #name)
         ((g ^. #function) . (f ^. #function))
 
 {- | The projection into the first component. -}
-firstE :: Function (a, b) a
+firstE :: NamedFn (a, b) a
 firstE = annotateE (pack "first") fst
 
 {- | The projection into the first component. -}
-secondE :: Function (a, b) b
+secondE :: NamedFn (a, b) b
 secondE = annotateE (pack "second") snd
 
 {- | The unique function into the product unit. -}
-terminal :: Function a ()
+terminal :: NamedFn a ()
 terminal = annotateE (pack "terminal") (const ())
 
 {- | The product diagonal. -}
-diagonalE :: Function a (a, a)
+diagonalE :: NamedFn a (a, a)
 diagonalE = annotateE (pack "diagonal") (\ x -> (x, x))
 
 {- | The product bifunctor. -}
-productE :: Function a c -> Function b d -> Function (a, b) (c, d)
+productE :: NamedFn a c -> NamedFn b d -> NamedFn (a, b) (c, d)
 productE f g =
     annotateE
         (f ^. #name <> pack " :*: " <> g ^. #name)
         (bimap (f ^. #function) (g ^. #function))
 
 {- | A binary operator in uncurried form. -}
-binaryE :: Operator -> (a -> a -> b) -> Function (a, a) b
+binaryE :: Operator -> (a -> a -> b) -> NamedFn (a, a) b
 binaryE (Operator op) h =
     annotateE
         ((pack "uncurry ") <> (withParens op))
         (uncurry h)
 
 {- | Uncurry a named function. -}
-uncurryE :: Function a (b -> c) -> Function (a, b) c
+uncurryE :: NamedFn a (b -> c) -> NamedFn (a, b) c
 uncurryE f = annotateE (pack "uncurry " <> f ^. #name) (uncurry $ f ^. #function)
 
 {- | Curry a named function. -}
-curryE :: Function (a, b) c -> Function a (b -> c)
+curryE :: NamedFn (a, b) c -> NamedFn a (b -> c)
 curryE f = annotateE (pack "curry " <> f ^. #name) (curry $ f ^. #function)
 
 {- | The symmetry of the product. -}
-swapE :: Function (a, b) (b, a)
+swapE :: NamedFn (a, b) (b, a)
 swapE = annotateE (pack "swap") swap
 
 {- | The monoidal structure of the product. -}
-associatorE :: Function (a, (b, c)) ((a, b), c)
+associatorE :: NamedFn (a, (b, c)) ((a, b), c)
 associatorE = annotateE (pack "associator") (\ (x, (y, z)) -> ((x, y), z))
 
 {- | The first injection into the coproduct. -}
-cofirstE :: Function a (a :+: b)
+cofirstE :: NamedFn a (a :+: b)
 cofirstE = annotateE (pack "cofirst") Left
 
 {- | The second injection into the coproduct. -}
-cosecondE :: Function b (a :+: b)
+cosecondE :: NamedFn b (a :+: b)
 cosecondE = annotateE (pack "cosecond") Right
 
 {- | The unique function from the 'Void' type. Ftaghn. -}
-initialE :: Function Void a
+initialE :: NamedFn Void a
 initialE = annotateE (pack "initial") absurd
 
 {- | The coproduct codiagonal. -}
-codiagonalE :: Function (a :+: a) a
+codiagonalE :: NamedFn (a :+: a) a
 codiagonalE = annotateE (pack "codiagonal") (either id id)
 
 {- | The coproduct bifunctor. -}
-coproductE :: Function a c -> Function b d -> Function (a :+: b) (c :+: d)
+coproductE :: NamedFn a c -> NamedFn b d -> NamedFn (a :+: b) (c :+: d)
 coproductE f g =
     annotateE
         (f ^. #name <> pack " :+: " <> g ^. #name)
         (bimap (f ^. #function) (g ^. #function))
 
 {- | The symmetry of the coproduct. -}
-coswapE :: Function (a :+: b) (b :+: a)
+coswapE :: NamedFn (a :+: b) (b :+: a)
 coswapE = annotateE (pack "coswap") coswap
 
 {- | The monoidal structure of the coproduct. -}
-coassociatorE :: Function (a :+: (b :+: c)) ((a :+: b) :+: c)
+coassociatorE :: NamedFn (a :+: (b :+: c)) ((a :+: b) :+: c)
 coassociatorE = annotateE (pack "coassociator") coassociator
 
 {- | The 'Functor' map. -}
-mapE :: Functor f => Function a b -> Function (f a) (f b)
+mapE :: Functor f => NamedFn a b -> NamedFn (f a) (f b)
 mapE f =
     annotateE
         (pack "fmap " <> withParens (f ^. #name))
         (fmap (f ^. #function))
 
 {- | The 'Applicative' zipping map. -}
-zipE :: Applicative f => Function (f a, f b) (f (a, b))
+zipE :: Applicative f => NamedFn (f a, f b) (f (a, b))
 zipE =
     annotateE
         (pack "zip")
         (\ (p, q) -> (fmap (,) p) <*> q)
 
 {- | The 'Applicative' pure map. -}
-pureE :: Applicative f => Function a (f a)
+pureE :: Applicative f => NamedFn a (f a)
 pureE = annotateE (pack "pure") pure

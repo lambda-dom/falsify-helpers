@@ -12,7 +12,7 @@ import Data.Text (pack)
 import Test.Falsify (Gen, Property)
 
 -- Package.
-import Data.Function.Annotated (Function, annotateE, idE)
+import Data.Function.Annotated (NamedFn, annotateE, idE)
 import Test.Gen (triple)
 import Test.Property (prop_extensional_equality)
 
@@ -24,12 +24,12 @@ prop_semigroup_laws
     -> Property ()
 prop_semigroup_laws genA = prop_extensional_equality left right (triple genA genA genA) 
     where
-        left :: Function (a, a, a) a
+        left :: NamedFn (a, a, a) a
         left = annotateE
             (pack "x <> (y <> z)")
             (\ (x, y, z) -> x <> (y <> z))
 
-        right :: Function (a, a, a) a
+        right :: NamedFn (a, a, a) a
         right = annotateE
             (pack "(x <> y) <> z")
             (\ (x, y, z) -> (x <> y) <> z)
@@ -44,8 +44,8 @@ prop_monoid_laws genA
     *> prop_extensional_equality left idE genA
     *> prop_extensional_equality right idE genA
     where
-        left :: Function a a
+        left :: NamedFn a a
         left = annotateE (pack "x <> mempty") (<> mempty)
 
-        right :: Function a a
+        right :: NamedFn a a
         right = annotateE (pack "mempty <> x") (mempty <>)

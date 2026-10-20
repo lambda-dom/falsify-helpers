@@ -13,15 +13,15 @@ import Data.String (fromString)
 import Test.Falsify (Gen, Property, (.$), gen, assert)
 
 -- Package.
-import Data.Function.Annotated (Function)
+import Data.Function.Annotated (NamedFn)
 import Test.Predicate (isExtensionallyEqual)
 
 
 {- | Test extensional equality of functions. -}
 prop_extensional_equality
     :: (Show a, Eq b)
-    => Function a b
-    -> Function a b
+    => NamedFn a b
+    -> NamedFn a b
     -> Gen a
     -> Property ()
 prop_extensional_equality p q g = do

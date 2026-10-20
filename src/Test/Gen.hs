@@ -29,12 +29,16 @@ module Test.Gen (
     pair,
     triple,
     quadruple,
+
+    -- * Function generators.
+    functions,
 ) where
 
 -- Imports.
 -- Base.
 import Data.Bits (FiniteBits)
 import Data.Char (chr)
+import Data.Int (Int8, Int16, Int32)
 import Data.Word (Word8, Word16, Word32)
 
 -- Libraries.
@@ -43,10 +47,12 @@ import qualified Data.Text as Text (Text, pack)
 import qualified Data.Text.Internal as Internal (safe)
 
 -- Testing.
-import Test.Falsify (Gen)
-import Test.Falsify.Generator (inRange, list, int)
+import Data.Function.Annotated (NamedFn, annotateE)
+import Test.Falsify (Gen, Fun, pattern Fn)
+import Test.Falsify.Generator (inRange, list, int, fun)
+import qualified Test.Falsify.Generator as Falsify (Function)
 import Test.Falsify.Range (uniform, inclusive, enum)
-import Data.Int (Int8, Int16, Int32)
+import Data.Text (pack)
 
 
 {- | Generator for bounded integral types with a finite number of bits. Biased towards zero. -}
@@ -127,3 +133,10 @@ triple f g h = (,,) <$> f <*> g <*> h
 quadruple :: Gen a -> Gen b -> Gen c -> Gen d -> Gen (a, b, c, d)
 quadruple f g h i = (,,,) <$> f <*> g <*> h <*> i
 
+
+{- | Generator for named functions. -}
+functions :: forall a b . (Falsify.Function a, Show a, Show b) => Gen b -> Gen (NamedFn a b)
+functions genB = fmap transform $ fun genB
+    where
+        transform :: Fun a b -> NamedFn a b
+        transform fn = let Fn f = fn in annotateE (pack $ show fn) f

@@ -18,26 +18,26 @@ import Optics.Core (Iso', Lens', Prism', view, review, preview, set)
 import Test.Falsify (Gen, Property)
 
 -- Package.
-import Data.Function.Annotated (Function, annotateE, composeE, idE, mapE)
+import Data.Function.Annotated (NamedFn, annotateE, composeE, idE, mapE)
 import Test.Property (prop_extensional_equality)
 
 
 {- | Turn an Isomorphism into a pair of named functions. -}
-fromIso :: Text -> Iso' a b -> (Function a b, Function b a)
+fromIso :: Text -> Iso' a b -> (NamedFn a b, NamedFn b a)
 fromIso xs i = (f, g)
     where
         f = annotateE (pack "view " <> xs) (view i)
         g = annotateE (pack "review " <> xs) (review i)
 
 {- | Turn a Lens into a pair of named functions. -}
-fromLens :: Text -> Lens' s a -> (Function s a, Function a (s -> s))
+fromLens :: Text -> Lens' s a -> (NamedFn s a, NamedFn a (s -> s))
 fromLens xs l = (f, g)
     where
         f = annotateE (pack "view " <> xs) (view l)
         g = annotateE (pack "set " <> xs) (set l)
 
 {- | Turn a Prism into a pair of named functions. -}
-fromPrism :: Text -> Prism' s a -> (Function s (Maybe a), Function a s) 
+fromPrism :: Text -> Prism' s a -> (NamedFn s (Maybe a), NamedFn a s) 
 fromPrism xs p = (f, g)
     where
         f = annotateE (pack "preview " <> xs) (preview p)
@@ -68,10 +68,10 @@ prop_prism_laws xs p genS genA = let (q, r) = fromPrism xs p in
         prop_extensional_equality (composeE q r) just genA *>
         prop_extensional_equality (composeE (mapE r) q) matches genS
     where
-        just :: Function a (Maybe a)
+        just :: NamedFn a (Maybe a)
         just = annotateE (pack "Just") Just
 
-        matches :: Function s (Maybe s)
+        matches :: NamedFn s (Maybe s)
         matches =
             annotateE
                 (pack "matching " <> xs)
